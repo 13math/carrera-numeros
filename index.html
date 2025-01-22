@@ -1,4 +1,3 @@
-<!-- Juego: Carrera de Números -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -88,19 +87,19 @@
             text-align: center;
         }
         .traditional-operation .operation {
-            text-align: right; /* Alineación a la derecha */
-            margin-right: -20px; /* Ajuste para mover el operador hacia la derecha */
+            text-align: right;
+            margin-right: -20px;
         }
         .traditional-operation .line {
             border-top: 2px solid black;
             display: inline-block;
-            width: 150%; /* Asegura que la línea se ajuste al contenido */
+            width: 150%;
             margin-top: 5px;
         }
         .traditional-operation .number {
             display: block;
-            text-align: right; /* Alineación del número superior a la derecha */
-            margin-right: -20px; /* Ajuste para moverlo */
+            text-align: right;
+            margin-right: -20px;
         }
         select {
             padding: 10px;
@@ -137,7 +136,7 @@
         </div>
         <p class="feedback" id="feedback"></p>
         <p class="winner" id="winner"></p>
-        <button id="restart" onclick="restartGame()" style="display: none;">Reiniciar</button>
+        <button id="restart" onclick="restartGame()">Reiniciar</button>
     </div>
 
     <script>
@@ -178,7 +177,6 @@
             let answer;
 
             if (operation === ":") {
-                // Ensure exact division
                 num1 = num1 * num2;
                 answer = num1 / num2;
             } else if (operation === "-") {
@@ -211,7 +209,7 @@
             return `
                 <div class="number">${num1}</div>
                 <div class="operation">${operation} ${num2}</div>
-                <div class="line"></div> <!-- Línea ajustada aquí -->
+                <div class="line"></div>
             `;
         }
 
@@ -269,8 +267,6 @@
 
         function declareWinner(message) {
             winnerElement.textContent = message;
-            document.querySelector(".controls").style.display = "none";
-            restartButton.style.display = "block";
             clearTimeout(timeOut);
         }
 
@@ -281,8 +277,6 @@
             winnerElement.textContent = "";
             feedbackElement.textContent = "";
             answerInput.value = "";
-            document.querySelector(".controls").style.display = "block";
-            restartButton.style.display = "none";
             movePlayer(player1, player1Position);
             movePlayer(player2, player2Position);
             updateQuestion();
