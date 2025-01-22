@@ -43,13 +43,13 @@
         }
         .race-track .player1 {
             position: absolute;
-            top: 10%;
+            top: -10%;
             left: 0;
             background-color: #28a745;
         }
         .race-track .player2 {
             position: absolute;
-            top: 10%;
+            top: 30%;
             left: 0;
             background-color: #dc3545;
         }
@@ -125,7 +125,7 @@
             <option value="+">Sumas</option>
             <option value="-">Restas</option>
             <option value="positive-subtraction">Restas (resultado positivo)</option>
-            <option value="*">Multiplicaciones</option>
+            <option value="·">Multiplicaciones</option>
             <option value=":">Divisiones</option>
         </select>
         <p id="question" style="font-size: 1.5em; margin: 20px 0;"></p>
@@ -164,7 +164,7 @@
             let operations;
 
             if (operationType === "all") {
-                operations = ["+", "-", "*", ":"];
+                operations = ["+", "-", "·", ":"];
             } else if (operationType === "positive-subtraction") {
                 operations = ["-"];
             } else {
@@ -189,7 +189,7 @@
                     case '+':
                         answer = num1 + num2;
                         break;
-                    case '*':
+                    case '·':
                         answer = num1 * num2;
                         break;
                 }
