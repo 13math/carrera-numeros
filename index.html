@@ -87,12 +87,20 @@
             font-size: 1.5em;
             text-align: center;
         }
+        .traditional-operation .operation {
+            text-align: right; /* Alineación a la derecha */
+            margin-right: -20px; /* Ajuste para mover el operador hacia la derecha */
+        }
         .traditional-operation .line {
             border-top: 2px solid black;
             display: inline-block;
-            width: 150%;
+            width: 150%; /* Asegura que la línea se ajuste al contenido */
             margin-top: 5px;
-            margin-left: -10%;
+        }
+        .traditional-operation .number {
+            display: block;
+            text-align: right; /* Alineación del número superior a la derecha */
+            margin-right: -20px; /* Ajuste para moverlo */
         }
         select {
             padding: 10px;
@@ -148,7 +156,6 @@
         let player2Position = 0;
         const goalPosition = 10;
         let timeOut;
-        let isFirstAnswer = true; // Variable para controlar si es la primera respuesta
 
         let currentProblem = generateProblem();
         updateQuestion();
@@ -202,9 +209,9 @@
                 return `${num1} : ${num2}`;
             }
             return `
-                <div>${num1}</div>
-                <div>${operation} ${num2}</div>
-                <div class="line"></div>
+                <div class="number">${num1}</div>
+                <div class="operation">${operation} ${num2}</div>
+                <div class="line"></div> <!-- Línea ajustada aquí -->
             `;
         }
 
@@ -213,26 +220,16 @@
             operationElement.innerHTML = currentProblem.traditional;
             clearTimeout(timeOut);
 
-            if (isFirstAnswer) {
-                timeOut = setTimeout(() => {
-                    player2Position++;
-                    movePlayer(player2, player2Position);
-                    if (player2Position === goalPosition) {
-                        declareWinner("La computadora ha ganado la carrera. Intenta de nuevo.");
-                    }
-                }, 2000); 
-            } else {
-                const remainingSteps = goalPosition - player2Position;
-                const delay = Math.max(5000, remainingSteps * 2000);
+            const remainingSteps = goalPosition - player2Position;
+            const delay = Math.max(5000, remainingSteps * 2000);
 
-                timeOut = setTimeout(() => {
-                    player2Position++;
-                    movePlayer(player2, player2Position);
-                    if (player2Position === goalPosition) {
-                        declareWinner("La computadora ha ganado la carrera. Intenta de nuevo.");
-                    }
-                }, delay);
-            }
+            timeOut = setTimeout(() => {
+                player2Position++;
+                movePlayer(player2, player2Position);
+                if (player2Position === goalPosition) {
+                    declareWinner("La computadora ha ganado la carrera. Intenta de nuevo.");
+                }
+            }, delay);
         }
 
         function movePlayer(player, steps) {
@@ -258,10 +255,6 @@
 
                 currentProblem = generateProblem();
                 updateQuestion();
-
-                if (isFirstAnswer) {
-                    isFirstAnswer = false; 
-                }
             } else {
                 feedbackElement.textContent = "Respuesta incorrecta.";
                 player2Position++;
