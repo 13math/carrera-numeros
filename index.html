@@ -76,6 +76,7 @@
             margin-top: 20px;
         }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML" async></script>
 </head>
 <body>
     <h1>Carrera de Números</h1>
@@ -111,8 +112,8 @@
 
         function generateProblem() {
             const operations = ['+', '-', '*', '/'];
-            const num1 = Math.floor(Math.random() * 10) + 1;
-            const num2 = Math.floor(Math.random() * 10) + 1;
+            const num1 = Math.floor(Math.random() * 100) + 1;
+            const num2 = Math.floor(Math.random() * 100) + 1;
             const operation = operations[Math.floor(Math.random() * operations.length)];
             let answer;
 
@@ -133,20 +134,26 @@
 
             return {
                 question: `${num1} ${operation} ${num2}`,
+                latex: `\\(${num1} ${operation} ${num2}\\)` ,
                 answer
             };
         }
 
         function updateQuestion() {
-            questionElement.textContent = `Resuelve: ${currentProblem.question}`;
+            questionElement.innerHTML = `Resuelve: ${currentProblem.latex}`;
+            MathJax.Hub.Queue(["Typeset", MathJax.Hub, questionElement]);
             clearTimeout(timeOut);
+
+            const remainingSteps = goalPosition - player2Position;
+            const delay = Math.max(5000, remainingSteps * 2000); // Tiempo dinámico basado en cercanía
+
             timeOut = setTimeout(() => {
                 player2Position++;
                 movePlayer(player2, player2Position);
                 if (player2Position === goalPosition) {
                     declareWinner("La computadora ha ganado la carrera. Intenta de nuevo.");
                 }
-            }, 10000);
+            }, delay);
         }
 
         function movePlayer(player, steps) {
