@@ -82,10 +82,16 @@
         }
         .traditional-operation {
             display: inline-block;
-            text-align: right;
             margin: 20px auto;
             font-family: 'Courier New', Courier, monospace;
             font-size: 1.5em;
+            text-align: center;
+        }
+        .traditional-operation .line {
+            border-top: 2px solid black;
+            display: inline-block;
+            width: 100%;
+            margin-top: 5px;
         }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML" async></script>
@@ -162,15 +168,16 @@
         }
 
         function formatTraditionalOperation(num1, num2, operation) {
-            const maxLength = Math.max(num1.toString().length, num2.toString().length);
-            const num1Str = num1.toString().padStart(maxLength, ' ');
-            const num2Str = `${operation} ${num2.toString().padStart(maxLength - 2, ' ')}`;
-            return `${num1Str}\n${num2Str}`;
+            return `
+                <div>${num1}</div>
+                <div>${operation} ${num2}</div>
+                <div class="line"></div>
+            `;
         }
 
         function updateQuestion() {
             questionElement.innerHTML = `Resuelve:`;
-            operationElement.textContent = currentProblem.traditional;
+            operationElement.innerHTML = currentProblem.traditional;
             clearTimeout(timeOut);
 
             const remainingSteps = goalPosition - player2Position;
