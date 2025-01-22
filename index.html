@@ -1,298 +1,76 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Carrera de Números</title>
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            text-align: center;
-            background-color: #f4f4f9;
-            color: #333;
-            margin: 0;
-            padding: 0;
-        }
-        .game-container {
-            margin: 20px auto;
-            padding: 20px;
-            max-width: 600px;
-            background: linear-gradient(to bottom, #ffffff, #dceefb);
-            border: 2px solid #6c757d;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        .race-track {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin: 20px 0;
-            padding: 20px;
-            background-color: #e9ecef;
-            border-radius: 10px;
-            position: relative;
-        }
-        .race-track div {
-            width: 40px;
-            height: 40px;
-            line-height: 40px;
-            text-align: center;
-            border-radius: 50%;
-            color: white;
-            font-weight: bold;
-        }
-        .race-track .player1 {
-            position: absolute;
-            top: 10%;
-            left: 0;
-            background-color: #28a745;
-        }
-        .race-track .player2 {
-            position: absolute;
-            top: 70%;
-            left: 0;
-            background-color: #dc3545;
-        }
-        .controls {
-            margin-top: 20px;
-        }
-        button {
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            margin: 5px;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        .winner {
-            font-size: 1.5em;
-            color: green;
-            margin-top: 20px;
-        }
-        .feedback {
-            font-size: 1.2em;
-            color: red;
-            margin-top: 10px;
-        }
-        .traditional-operation {
-            display: inline-block;
-            margin: 20px auto;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 1.5em;
-            text-align: center;
-        }
-        .traditional-operation .operation {
-            text-align: right;
-            margin-right: -20px;
-        }
-        .traditional-operation .line {
-            border-top: 2px solid black;
-            display: inline-block;
-            width: 150%;
-            margin-top: 5px;
-        }
-        .traditional-operation .number {
-            display: block;
-            text-align: right;
-            margin-right: -20px;
-        }
-        select {
-            padding: 10px;
-            font-size: 16px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            margin: 10px;
-        }
-    </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML" async></script>
-</head>
-<body>
-    <h1>Carrera de Números</h1>
-    <p>Compite contra la computadora resolviendo problemas matemáticos. ¡El primero en llegar a la meta gana!</p>
-    <div class="game-container">
-        <div class="race-track" id="race-track">
-            <div class="player1" id="player1">1</div>
-            <div class="player2" id="player2">2</div>
-        </div>
-        <label for="operation-type">Elige el tipo de operación:</label>
-        <select id="operation-type">
-            <option value="all">Mixto</option>
-            <option value="+">Sumas</option>
-            <option value="-">Restas</option>
-            <option value="positive-subtraction">Restas (resultado positivo)</option>
-            <option value="*">Multiplicaciones</option>
-            <option value=":">Divisiones</option>
-        </select>
-        <p id="question" style="font-size: 1.5em; margin: 20px 0;"></p>
-        <div class="traditional-operation" id="operation"></div>
-        <div class="controls">
-            <input type="text" id="answer" placeholder="Ingresa tu respuesta" style="font-size: 18px; padding: 10px;">
-            <button onclick="checkAnswer()">Responder</button>
-        </div>
-        <p class="feedback" id="feedback"></p>
-        <p class="winner" id="winner"></p>
-        <button id="restart" onclick="restartGame()">Reiniciar</button>
-    </div>
+<script>
+    function updateQuestion() {
+        questionElement.innerHTML = `Resuelve:`;
+        operationElement.innerHTML = currentProblem.traditional;
+        clearTimeout(timeOut);
 
-    <script>
-        const raceTrack = document.getElementById("race-track");
-        const player1 = document.getElementById("player1");
-        const player2 = document.getElementById("player2");
-        const questionElement = document.getElementById("question");
-        const operationElement = document.getElementById("operation");
-        const feedbackElement = document.getElementById("feedback");
-        const winnerElement = document.getElementById("winner");
-        const answerInput = document.getElementById("answer");
-        const restartButton = document.getElementById("restart");
-        const operationTypeSelector = document.getElementById("operation-type");
+        const remainingStepsPlayer1 = goalPosition - player1Position;
+        const baseSpeed = 5000;
+        const minSpeed = 1000;
+        const speedMultiplier = 200;
 
-        let player1Position = 0;
-        let player2Position = 0;
-        const goalPosition = 10;
-        let timeOut;
+        // Ajuste dinámico de la velocidad de player2
+        const adjustedDelay = Math.max(
+            minSpeed,
+            baseSpeed - remainingStepsPlayer1 * speedMultiplier
+        );
 
-        let currentProblem = generateProblem();
-        updateQuestion();
-
-        function generateProblem() {
-            const operationType = operationTypeSelector.value;
-            let operations;
-
-            if (operationType === "all") {
-                operations = ["+", "-", "*", ":"];
-            } else if (operationType === "positive-subtraction") {
-                operations = ["-"];
-            } else {
-                operations = [operationType];
-            }
-
-            let num1 = Math.floor(Math.random() * 100) + 1;
-            let num2 = Math.floor(Math.random() * 100) + 1;
-            const operation = operations[Math.floor(Math.random() * operations.length)];
-            let answer;
-
-            if (operation === ":") {
-                num1 = num1 * num2;
-                answer = num1 / num2;
-            } else if (operation === "-") {
-                if (operationType === "positive-subtraction" && num1 < num2) {
-                    [num1, num2] = [num2, num1];
-                }
-                answer = num1 - num2;
-            } else {
-                switch (operation) {
-                    case '+':
-                        answer = num1 + num2;
-                        break;
-                    case '*':
-                        answer = num1 * num2;
-                        break;
-                }
-            }
-
-            return {
-                question: `${num1} ${operation} ${num2}`,
-                traditional: formatTraditionalOperation(num1, num2, operation),
-                answer
-            };
-        }
-
-        function formatTraditionalOperation(num1, num2, operation) {
-            if (operation === ":") {
-                return `${num1} : ${num2}`;
-            }
-            return `
-                <div class="number">${num1}</div>
-                <div class="operation">${operation} ${num2}</div>
-                <div class="line"></div>
-            `;
-        }
-
-        function updateQuestion() {
-            questionElement.innerHTML = `Resuelve:`;
-            operationElement.innerHTML = currentProblem.traditional;
-            clearTimeout(timeOut);
-
-            const remainingStepsPlayer1 = goalPosition - player1Position;
-
-            const baseSpeed = 5000;
-            const minSpeed = 1000;
-            const speedMultiplier = 200;
-            const adjustedDelay = Math.max(
-                minSpeed,
-                baseSpeed - remainingStepsPlayer1 * speedMultiplier
-            );
-
-            timeOut = setTimeout(() => {
+        // Movimiento continuo de player2
+        timeOut = setTimeout(() => {
+            if (player2Position < goalPosition) {
                 player2Position++;
                 movePlayer(player2, player2Position);
                 if (player2Position === goalPosition) {
                     declareWinner("La computadora ha ganado la carrera. Intenta de nuevo.");
+                } else {
+                    updateQuestion(); // Llamada recursiva para seguir moviendo player2
                 }
-            }, adjustedDelay);
+            }
+        }, adjustedDelay);
+    }
+
+    function checkAnswer() {
+        const playerAnswer = parseFloat(answerInput.value);
+
+        if (isNaN(playerAnswer)) {
+            feedbackElement.textContent = "Por favor, ingresa un número válido.";
+            return;
         }
 
-        function movePlayer(player, steps) {
-            player.style.left = `${(steps / goalPosition) * 100}%`;
-        }
-
-        function checkAnswer() {
-            const playerAnswer = parseFloat(answerInput.value);
-
-            if (isNaN(playerAnswer)) {
-                feedbackElement.textContent = "Por favor, ingresa un número válido.";
+        if (playerAnswer === currentProblem.answer) {
+            player1Position++;
+            movePlayer(player1, player1Position);
+            feedbackElement.textContent = "¡Correcto!";
+            if (player1Position === goalPosition) {
+                declareWinner("¡Felicidades! Has ganado la carrera.");
                 return;
             }
 
-            if (playerAnswer === currentProblem.answer) {
-                player1Position++;
-                movePlayer(player1, player1Position);
-                feedbackElement.textContent = "¡Correcto!";
-                if (player1Position === goalPosition) {
-                    declareWinner("¡Felicidades! Has ganado la carrera.");
-                    return;
-                }
-
-                currentProblem = generateProblem();
-                updateQuestion();
-            } else {
-                feedbackElement.textContent = "Respuesta incorrecta.";
+            currentProblem = generateProblem();
+            updateQuestion();
+        } else {
+            feedbackElement.textContent = "Respuesta incorrecta.";
+            if (player2Position < goalPosition) {
                 player2Position++;
                 movePlayer(player2, player2Position);
                 if (player2Position === goalPosition) {
                     declareWinner("La computadora ha ganado la carrera. Intenta de nuevo.");
                 }
             }
-
-            answerInput.value = "";
         }
 
-        function declareWinner(message) {
-            winnerElement.textContent = message;
-            clearTimeout(timeOut);
-        }
+        answerInput.value = "";
+    }
 
-        function restartGame() {
-            player1Position = 0;
-            player2Position = 0;
-            currentProblem = generateProblem();
-            winnerElement.textContent = "";
-            feedbackElement.textContent = "";
-            answerInput.value = "";
-            movePlayer(player1, player1Position);
-            movePlayer(player2, player2Position);
-            updateQuestion();
-        }
-
-        operationTypeSelector.addEventListener("change", () => {
-            currentProblem = generateProblem();
-            updateQuestion();
-        });
-    </script>
-</body>
-</html>
+    function restartGame() {
+        player1Position = 0;
+        player2Position = 0;
+        currentProblem = generateProblem();
+        winnerElement.textContent = "";
+        feedbackElement.textContent = "";
+        answerInput.value = "";
+        movePlayer(player1, player1Position);
+        movePlayer(player2, player2Position);
+        updateQuestion();
+    }
+</script>
