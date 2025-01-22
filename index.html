@@ -109,6 +109,7 @@
             margin: 10px;
         }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML" async></script>
 </head>
 <body>
     <h1>Carrera de Números</h1>
@@ -139,6 +140,7 @@
     </div>
 
     <script>
+        const raceTrack = document.getElementById("race-track");
         const player1 = document.getElementById("player1");
         const player2 = document.getElementById("player2");
         const questionElement = document.getElementById("question");
@@ -146,6 +148,7 @@
         const feedbackElement = document.getElementById("feedback");
         const winnerElement = document.getElementById("winner");
         const answerInput = document.getElementById("answer");
+        const restartButton = document.getElementById("restart");
         const operationTypeSelector = document.getElementById("operation-type");
 
         let player1Position = 0;
@@ -158,11 +161,16 @@
 
         function generateProblem() {
             const operationType = operationTypeSelector.value;
-            const operations = operationType === "all"
-                ? ["+", "-", "*", ":"]
-                : operationType === "positive-subtraction"
-                ? ["-"]
-                : [operationType];
+            let operations;
+
+            if (operationType === "all") {
+                operations = ["+", "-", "*", ":"];
+            } else if (operationType === "positive-subtraction") {
+                operations = ["-"];
+            } else {
+                operations = [operationType];
+            }
+
             let num1 = Math.floor(Math.random() * 100) + 1;
             let num2 = Math.floor(Math.random() * 100) + 1;
             const operation = operations[Math.floor(Math.random() * operations.length)];
@@ -176,36 +184,50 @@
                     [num1, num2] = [num2, num1];
                 }
                 answer = num1 - num2;
-            } else if (operation === "+") {
-                answer = num1 + num2;
-            } else if (operation === "*") {
-                answer = num1 * num2;
+            } else {
+                switch (operation) {
+                    case '+':
+                        answer = num1 + num2;
+                        break;
+                    case '*':
+                        answer = num1 * num2;
+                        break;
+                }
             }
 
             return {
                 question: `${num1} ${operation} ${num2}`,
+                traditional: formatTraditionalOperation(num1, num2, operation),
                 answer
             };
         }
 
+        function formatTraditionalOperation(num1, num2, operation) {
+            if (operation === ":") {
+                return `${num1} : ${num2}`;
+            }
+            return `
+                <div class="number">${num1}</div>
+                <div class="operation">${operation} ${num2}</div>
+                <div class="line"></div>
+            `;
+        }
+
         function updateQuestion() {
-            questionElement.innerHTML = `Resuelve: ${currentProblem.question}`;
+            questionElement.innerHTML = `Resuelve:`;
+            operationElement.innerHTML = currentProblem.traditional;
             clearTimeout(timeOut);
 
-            const baseDelay = 2000;
-            const adjustedDelay = baseDelay - (goalPosition - player1Position) * 100;
+            const remainingSteps = goalPosition - player2Position;
+            const delay = Math.max(5000, remainingSteps * 2000);
 
             timeOut = setTimeout(() => {
-                if (player2Position < goalPosition) {
-                    player2Position++;
-                    movePlayer(player2, player2Position);
-                    if (player2Position === goalPosition) {
-                        declareWinner("La computadora ha ganado la carrera. Intenta de nuevo.");
-                    } else {
-                        updateQuestion();
-                    }
+                player2Position++;
+                movePlayer(player2, player2Position);
+                if (player2Position === goalPosition) {
+                    declareWinner("La computadora ha ganado la carrera. Intenta de nuevo.");
                 }
-            }, Math.max(500, adjustedDelay));
+            }, delay);
         }
 
         function movePlayer(player, steps) {
@@ -214,6 +236,7 @@
 
         function checkAnswer() {
             const playerAnswer = parseFloat(answerInput.value);
+
             if (isNaN(playerAnswer)) {
                 feedbackElement.textContent = "Por favor, ingresa un número válido.";
                 return;
@@ -225,18 +248,17 @@
                 feedbackElement.textContent = "¡Correcto!";
                 if (player1Position === goalPosition) {
                     declareWinner("¡Felicidades! Has ganado la carrera.");
-                } else {
-                    currentProblem = generateProblem();
-                    updateQuestion();
+                    return;
                 }
+
+                currentProblem = generateProblem();
+                updateQuestion();
             } else {
                 feedbackElement.textContent = "Respuesta incorrecta.";
-                if (player2Position < goalPosition) {
-                    player2Position++;
-                    movePlayer(player2, player2Position);
-                    if (player2Position === goalPosition) {
-                        declareWinner("La computadora ha ganado la carrera. Intenta de nuevo.");
-                    }
+                player2Position++;
+                movePlayer(player2, player2Position);
+                if (player2Position === goalPosition) {
+                    declareWinner("La computadora ha ganado la carrera. Intenta de nuevo.");
                 }
             }
 
@@ -259,6 +281,11 @@
             movePlayer(player2, player2Position);
             updateQuestion();
         }
+
+        operationTypeSelector.addEventListener("change", () => {
+            currentProblem = generateProblem();
+            updateQuestion();
+        });
     </script>
 </body>
 </html>
