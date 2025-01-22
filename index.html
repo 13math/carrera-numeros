@@ -81,17 +81,19 @@
             margin-top: 10px;
         }
         .traditional-operation {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            display: inline-block;
             margin: 20px auto;
             font-family: 'Courier New', Courier, monospace;
             font-size: 1.5em;
             text-align: center;
         }
+        .traditional-operation .operation {
+            text-align: left;
+            margin-left: -20px; /* Ajuste para mover el operador hacia la izquierda */
+        }
         .traditional-operation .line {
             border-top: 2px solid black;
+            display: inline-block;
             width: 100%;
             margin-top: 5px;
         }
@@ -203,7 +205,7 @@
             }
             return `
                 <div>${num1}</div>
-                <div>${operation} ${num2}</div>
+                <div class="operation">${operation} ${num2}</div>
                 <div class="line"></div>
             `;
         }
