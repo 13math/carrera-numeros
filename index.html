@@ -94,7 +94,7 @@
         .traditional-operation .line {
             border-top: 2px solid black;
             display: inline-block;
-            width: 100%; /* Cambiar a un valor dinámico */
+            width: 100%; /* Asegura que la línea se ajuste al contenido */
             margin-top: 5px;
         }
         .traditional-operation .number {
@@ -211,7 +211,7 @@
             return `
                 <div class="number">${num1}</div>
                 <div class="operation">${operation} ${num2}</div>
-                <div class="line" style="width: calc(100% - 40px);"></div>
+                <div class="line"></div> <!-- Línea ajustada aquí -->
             `;
         }
 
