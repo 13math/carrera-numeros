@@ -109,7 +109,6 @@
             margin: 10px;
         }
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML" async></script>
 </head>
 <body>
     <h1>Carrera de Números</h1>
@@ -138,82 +137,128 @@
         <p class="winner" id="winner"></p>
         <button id="restart" onclick="restartGame()">Reiniciar</button>
     </div>
-<script>
-    function updateQuestion() {
-        questionElement.innerHTML = `Resuelve:`;
-        operationElement.innerHTML = currentProblem.traditional;
-        clearTimeout(timeOut);
 
-        const remainingStepsPlayer1 = goalPosition - player1Position;
-        const baseSpeed = 5000;
-        const minSpeed = 1000;
-        const speedMultiplier = 200;
+    <script>
+        const player1 = document.getElementById("player1");
+        const player2 = document.getElementById("player2");
+        const questionElement = document.getElementById("question");
+        const operationElement = document.getElementById("operation");
+        const feedbackElement = document.getElementById("feedback");
+        const winnerElement = document.getElementById("winner");
+        const answerInput = document.getElementById("answer");
+        const operationTypeSelector = document.getElementById("operation-type");
 
-        // Ajuste dinámico de la velocidad de player2
-        const adjustedDelay = Math.max(
-            minSpeed,
-            baseSpeed - remainingStepsPlayer1 * speedMultiplier
-        );
+        let player1Position = 0;
+        let player2Position = 0;
+        const goalPosition = 10;
+        let timeOut;
 
-        // Movimiento continuo de player2
-        timeOut = setTimeout(() => {
-            if (player2Position < goalPosition) {
-                player2Position++;
-                movePlayer(player2, player2Position);
-                if (player2Position === goalPosition) {
-                    declareWinner("La computadora ha ganado la carrera. Intenta de nuevo.");
-                } else {
-                    updateQuestion(); // Llamada recursiva para seguir moviendo player2
+        let currentProblem = generateProblem();
+        updateQuestion();
+
+        function generateProblem() {
+            const operationType = operationTypeSelector.value;
+            const operations = operationType === "all"
+                ? ["+", "-", "*", ":"]
+                : operationType === "positive-subtraction"
+                ? ["-"]
+                : [operationType];
+            let num1 = Math.floor(Math.random() * 100) + 1;
+            let num2 = Math.floor(Math.random() * 100) + 1;
+            const operation = operations[Math.floor(Math.random() * operations.length)];
+            let answer;
+
+            if (operation === ":") {
+                num1 = num1 * num2;
+                answer = num1 / num2;
+            } else if (operation === "-") {
+                if (operationType === "positive-subtraction" && num1 < num2) {
+                    [num1, num2] = [num2, num1];
                 }
+                answer = num1 - num2;
+            } else if (operation === "+") {
+                answer = num1 + num2;
+            } else if (operation === "*") {
+                answer = num1 * num2;
             }
-        }, adjustedDelay);
-    }
 
-    function checkAnswer() {
-        const playerAnswer = parseFloat(answerInput.value);
-
-        if (isNaN(playerAnswer)) {
-            feedbackElement.textContent = "Por favor, ingresa un número válido.";
-            return;
+            return {
+                question: `${num1} ${operation} ${num2}`,
+                answer
+            };
         }
 
-        if (playerAnswer === currentProblem.answer) {
-            player1Position++;
-            movePlayer(player1, player1Position);
-            feedbackElement.textContent = "¡Correcto!";
-            if (player1Position === goalPosition) {
-                declareWinner("¡Felicidades! Has ganado la carrera.");
+        function updateQuestion() {
+            questionElement.innerHTML = `Resuelve: ${currentProblem.question}`;
+            clearTimeout(timeOut);
+
+            const baseDelay = 2000;
+            const adjustedDelay = baseDelay - (goalPosition - player1Position) * 100;
+
+            timeOut = setTimeout(() => {
+                if (player2Position < goalPosition) {
+                    player2Position++;
+                    movePlayer(player2, player2Position);
+                    if (player2Position === goalPosition) {
+                        declareWinner("La computadora ha ganado la carrera. Intenta de nuevo.");
+                    } else {
+                        updateQuestion();
+                    }
+                }
+            }, Math.max(500, adjustedDelay));
+        }
+
+        function movePlayer(player, steps) {
+            player.style.left = `${(steps / goalPosition) * 100}%`;
+        }
+
+        function checkAnswer() {
+            const playerAnswer = parseFloat(answerInput.value);
+            if (isNaN(playerAnswer)) {
+                feedbackElement.textContent = "Por favor, ingresa un número válido.";
                 return;
             }
 
-            currentProblem = generateProblem();
-            updateQuestion();
-        } else {
-            feedbackElement.textContent = "Respuesta incorrecta.";
-            if (player2Position < goalPosition) {
-                player2Position++;
-                movePlayer(player2, player2Position);
-                if (player2Position === goalPosition) {
-                    declareWinner("La computadora ha ganado la carrera. Intenta de nuevo.");
+            if (playerAnswer === currentProblem.answer) {
+                player1Position++;
+                movePlayer(player1, player1Position);
+                feedbackElement.textContent = "¡Correcto!";
+                if (player1Position === goalPosition) {
+                    declareWinner("¡Felicidades! Has ganado la carrera.");
+                } else {
+                    currentProblem = generateProblem();
+                    updateQuestion();
+                }
+            } else {
+                feedbackElement.textContent = "Respuesta incorrecta.";
+                if (player2Position < goalPosition) {
+                    player2Position++;
+                    movePlayer(player2, player2Position);
+                    if (player2Position === goalPosition) {
+                        declareWinner("La computadora ha ganado la carrera. Intenta de nuevo.");
+                    }
                 }
             }
+
+            answerInput.value = "";
         }
 
-        answerInput.value = "";
-    }
+        function declareWinner(message) {
+            winnerElement.textContent = message;
+            clearTimeout(timeOut);
+        }
 
-    function restartGame() {
-        player1Position = 0;
-        player2Position = 0;
-        currentProblem = generateProblem();
-        winnerElement.textContent = "";
-        feedbackElement.textContent = "";
-        answerInput.value = "";
-        movePlayer(player1, player1Position);
-        movePlayer(player2, player2Position);
-        updateQuestion();
-    }
-</script>
-
+        function restartGame() {
+            player1Position = 0;
+            player2Position = 0;
+            currentProblem = generateProblem();
+            winnerElement.textContent = "";
+            feedbackElement.textContent = "";
+            answerInput.value = "";
+            movePlayer(player1, player1Position);
+            movePlayer(player2, player2Position);
+            updateQuestion();
+        }
+    </script>
 </body>
 </html>
