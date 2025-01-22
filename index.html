@@ -75,6 +75,18 @@
             color: green;
             margin-top: 20px;
         }
+        .feedback {
+            font-size: 1.2em;
+            color: red;
+            margin-top: 10px;
+        }
+        .traditional-operation {
+            display: inline-block;
+            text-align: right;
+            margin: 20px auto;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1.5em;
+        }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML" async></script>
 </head>
@@ -87,11 +99,14 @@
             <div class="player2" id="player2">2</div>
         </div>
         <p id="question" style="font-size: 1.5em; margin: 20px 0;"></p>
+        <div class="traditional-operation" id="operation"></div>
         <div class="controls">
             <input type="text" id="answer" placeholder="Ingresa tu respuesta" style="font-size: 18px; padding: 10px;">
             <button onclick="checkAnswer()">Responder</button>
         </div>
+        <p class="feedback" id="feedback"></p>
         <p class="winner" id="winner"></p>
+        <button id="restart" onclick="restartGame()" style="display: none;">Reiniciar</button>
     </div>
 
     <script>
@@ -99,8 +114,11 @@
         const player1 = document.getElementById("player1");
         const player2 = document.getElementById("player2");
         const questionElement = document.getElementById("question");
+        const operationElement = document.getElementById("operation");
+        const feedbackElement = document.getElementById("feedback");
         const winnerElement = document.getElementById("winner");
         const answerInput = document.getElementById("answer");
+        const restartButton = document.getElementById("restart");
 
         let player1Position = 0;
         let player2Position = 0;
@@ -137,14 +155,22 @@
 
             return {
                 question: `${num1} ${operation} ${num2}`,
-                latex: `\\(${num1} ${operation} ${num2}\\)` ,
+                latex: `\(${num1} ${operation} ${num2}\)` ,
+                traditional: formatTraditionalOperation(num1, num2, operation),
                 answer
             };
         }
 
+        function formatTraditionalOperation(num1, num2, operation) {
+            const maxLength = Math.max(num1.toString().length, num2.toString().length);
+            const num1Str = num1.toString().padStart(maxLength, ' ');
+            const num2Str = `${operation} ${num2.toString().padStart(maxLength - 2, ' ')}`;
+            return `${num1Str}\n${num2Str}`;
+        }
+
         function updateQuestion() {
-            questionElement.innerHTML = `Resuelve: ${currentProblem.latex}`;
-            MathJax.Hub.Queue(["Typeset", MathJax.Hub, questionElement]);
+            questionElement.innerHTML = `Resuelve:`;
+            operationElement.textContent = currentProblem.traditional;
             clearTimeout(timeOut);
 
             const remainingSteps = goalPosition - player2Position;
@@ -167,13 +193,14 @@
             const playerAnswer = parseFloat(answerInput.value);
 
             if (isNaN(playerAnswer)) {
-                alert("Por favor, ingresa un número válido.");
+                feedbackElement.textContent = "Por favor, ingresa un número válido.";
                 return;
             }
 
             if (playerAnswer === currentProblem.answer) {
                 player1Position++;
                 movePlayer(player1, player1Position);
+                feedbackElement.textContent = "¡Correcto!";
                 if (player1Position === goalPosition) {
                     declareWinner("¡Felicidades! Has ganado la carrera.");
                     return;
@@ -182,7 +209,12 @@
                 currentProblem = generateProblem();
                 updateQuestion();
             } else {
-                alert("Respuesta incorrecta. Intenta nuevamente.");
+                feedbackElement.textContent = "Respuesta incorrecta.";
+                player2Position++;
+                movePlayer(player2, player2Position);
+                if (player2Position === goalPosition) {
+                    declareWinner("La computadora ha ganado la carrera. Intenta de nuevo.");
+                }
             }
 
             answerInput.value = "";
@@ -191,7 +223,22 @@
         function declareWinner(message) {
             winnerElement.textContent = message;
             document.querySelector(".controls").style.display = "none";
+            restartButton.style.display = "block";
             clearTimeout(timeOut);
+        }
+
+        function restartGame() {
+            player1Position = 0;
+            player2Position = 0;
+            currentProblem = generateProblem();
+            winnerElement.textContent = "";
+            feedbackElement.textContent = "";
+            answerInput.value = "";
+            document.querySelector(".controls").style.display = "block";
+            restartButton.style.display = "none";
+            movePlayer(player1, player1Position);
+            movePlayer(player2, player2Position);
+            updateQuestion();
         }
     </script>
 </body>
