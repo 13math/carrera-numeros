@@ -7,7 +7,7 @@
     <title>Carrera de Números</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
             text-align: center;
             background-color: #f4f4f9;
             color: #333;
@@ -18,7 +18,7 @@
             margin: 20px auto;
             padding: 20px;
             max-width: 600px;
-            background-color: #fff;
+            background: linear-gradient(to bottom, #ffffff, #dceefb);
             border: 2px solid #6c757d;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -28,7 +28,7 @@
             justify-content: space-between;
             align-items: center;
             margin: 20px 0;
-            padding: 10px;
+            padding: 20px;
             background-color: #e9ecef;
             border-radius: 10px;
             position: relative;
@@ -39,7 +39,6 @@
             line-height: 40px;
             text-align: center;
             border-radius: 50%;
-            background-color: #007bff;
             color: white;
             font-weight: bold;
         }
@@ -105,21 +104,49 @@
         let player1Position = 0;
         let player2Position = 0;
         const goalPosition = 10;
+        let timeOut;
 
         let currentProblem = generateProblem();
         updateQuestion();
 
         function generateProblem() {
+            const operations = ['+', '-', '*', '/'];
             const num1 = Math.floor(Math.random() * 10) + 1;
             const num2 = Math.floor(Math.random() * 10) + 1;
+            const operation = operations[Math.floor(Math.random() * operations.length)];
+            let answer;
+
+            switch (operation) {
+                case '+':
+                    answer = num1 + num2;
+                    break;
+                case '-':
+                    answer = num1 - num2;
+                    break;
+                case '*':
+                    answer = num1 * num2;
+                    break;
+                case '/':
+                    answer = parseFloat((num1 / num2).toFixed(2));
+                    break;
+            }
+
             return {
-                question: `${num1} + ${num2}`,
-                answer: num1 + num2
+                question: `${num1} ${operation} ${num2}`,
+                answer
             };
         }
 
         function updateQuestion() {
             questionElement.textContent = `Resuelve: ${currentProblem.question}`;
+            clearTimeout(timeOut);
+            timeOut = setTimeout(() => {
+                player2Position++;
+                movePlayer(player2, player2Position);
+                if (player2Position === goalPosition) {
+                    declareWinner("La computadora ha ganado la carrera. Intenta de nuevo.");
+                }
+            }, 10000);
         }
 
         function movePlayer(player, steps) {
@@ -127,7 +154,7 @@
         }
 
         function checkAnswer() {
-            const playerAnswer = parseInt(answerInput.value);
+            const playerAnswer = parseFloat(answerInput.value);
 
             if (isNaN(playerAnswer)) {
                 alert("Por favor, ingresa un número válido.");
@@ -144,23 +171,17 @@
 
                 currentProblem = generateProblem();
                 updateQuestion();
+            } else {
+                alert("Respuesta incorrecta. Intenta nuevamente.");
             }
 
             answerInput.value = "";
-
-            // Turno de la computadora
-            setTimeout(() => {
-                player2Position++;
-                movePlayer(player2, player2Position);
-                if (player2Position === goalPosition) {
-                    declareWinner("La computadora ha ganado la carrera. Intenta de nuevo.");
-                }
-            }, 1000);
         }
 
         function declareWinner(message) {
             winnerElement.textContent = message;
             document.querySelector(".controls").style.display = "none";
+            clearTimeout(timeOut);
         }
     </script>
 </body>
