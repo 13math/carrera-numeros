@@ -111,25 +111,28 @@
         updateQuestion();
 
         function generateProblem() {
-            const operations = ['+', '-', '*', '/'];
-            const num1 = Math.floor(Math.random() * 100) + 1;
-            const num2 = Math.floor(Math.random() * 100) + 1;
+            const operations = ['+', '-', '*', ':'];
+            let num1 = Math.floor(Math.random() * 100) + 1;
+            let num2 = Math.floor(Math.random() * 100) + 1;
             const operation = operations[Math.floor(Math.random() * operations.length)];
             let answer;
 
-            switch (operation) {
-                case '+':
-                    answer = num1 + num2;
-                    break;
-                case '-':
-                    answer = num1 - num2;
-                    break;
-                case '*':
-                    answer = num1 * num2;
-                    break;
-                case '/':
-                    answer = parseFloat((num1 / num2).toFixed(2));
-                    break;
+            if (operation === ':') {
+                // Ensure exact division
+                num1 = num1 * num2;
+                answer = num1 / num2;
+            } else {
+                switch (operation) {
+                    case '+':
+                        answer = num1 + num2;
+                        break;
+                    case '-':
+                        answer = num1 - num2;
+                        break;
+                    case '*':
+                        answer = num1 * num2;
+                        break;
+                }
             }
 
             return {
