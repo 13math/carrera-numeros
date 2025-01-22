@@ -1,0 +1,167 @@
+<!-- Juego: Carrera de Números -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carrera de Números</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .game-container {
+            margin: 20px auto;
+            padding: 20px;
+            max-width: 600px;
+            background-color: #fff;
+            border: 2px solid #6c757d;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .race-track {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px 0;
+            padding: 10px;
+            background-color: #e9ecef;
+            border-radius: 10px;
+            position: relative;
+        }
+        .race-track div {
+            width: 40px;
+            height: 40px;
+            line-height: 40px;
+            text-align: center;
+            border-radius: 50%;
+            background-color: #007bff;
+            color: white;
+            font-weight: bold;
+        }
+        .race-track .player1 {
+            position: absolute;
+            top: 10%;
+            left: 0;
+            background-color: #28a745;
+        }
+        .race-track .player2 {
+            position: absolute;
+            top: 70%;
+            left: 0;
+            background-color: #dc3545;
+        }
+        .controls {
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .winner {
+            font-size: 1.5em;
+            color: green;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Carrera de Números</h1>
+    <p>Compite contra la computadora resolviendo problemas matemáticos. ¡El primero en llegar a la meta gana!</p>
+    <div class="game-container">
+        <div class="race-track" id="race-track">
+            <div class="player1" id="player1">1</div>
+            <div class="player2" id="player2">2</div>
+        </div>
+        <p id="question" style="font-size: 1.5em; margin: 20px 0;"></p>
+        <div class="controls">
+            <input type="text" id="answer" placeholder="Ingresa tu respuesta" style="font-size: 18px; padding: 10px;">
+            <button onclick="checkAnswer()">Responder</button>
+        </div>
+        <p class="winner" id="winner"></p>
+    </div>
+
+    <script>
+        const raceTrack = document.getElementById("race-track");
+        const player1 = document.getElementById("player1");
+        const player2 = document.getElementById("player2");
+        const questionElement = document.getElementById("question");
+        const winnerElement = document.getElementById("winner");
+        const answerInput = document.getElementById("answer");
+
+        let player1Position = 0;
+        let player2Position = 0;
+        const goalPosition = 10;
+
+        let currentProblem = generateProblem();
+        updateQuestion();
+
+        function generateProblem() {
+            const num1 = Math.floor(Math.random() * 10) + 1;
+            const num2 = Math.floor(Math.random() * 10) + 1;
+            return {
+                question: `${num1} + ${num2}`,
+                answer: num1 + num2
+            };
+        }
+
+        function updateQuestion() {
+            questionElement.textContent = `Resuelve: ${currentProblem.question}`;
+        }
+
+        function movePlayer(player, steps) {
+            player.style.left = `${(steps / goalPosition) * 100}%`;
+        }
+
+        function checkAnswer() {
+            const playerAnswer = parseInt(answerInput.value);
+
+            if (isNaN(playerAnswer)) {
+                alert("Por favor, ingresa un número válido.");
+                return;
+            }
+
+            if (playerAnswer === currentProblem.answer) {
+                player1Position++;
+                movePlayer(player1, player1Position);
+                if (player1Position === goalPosition) {
+                    declareWinner("¡Felicidades! Has ganado la carrera.");
+                    return;
+                }
+
+                currentProblem = generateProblem();
+                updateQuestion();
+            }
+
+            answerInput.value = "";
+
+            // Turno de la computadora
+            setTimeout(() => {
+                player2Position++;
+                movePlayer(player2, player2Position);
+                if (player2Position === goalPosition) {
+                    declareWinner("La computadora ha ganado la carrera. Intenta de nuevo.");
+                }
+            }, 1000);
+        }
+
+        function declareWinner(message) {
+            winnerElement.textContent = message;
+            document.querySelector(".controls").style.display = "none";
+        }
+    </script>
+</body>
+</html>
