@@ -93,6 +93,13 @@
             width: 100%;
             margin-top: 5px;
         }
+        select {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin: 10px;
+        }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML" async></script>
 </head>
@@ -104,6 +111,15 @@
             <div class="player1" id="player1">1</div>
             <div class="player2" id="player2">2</div>
         </div>
+        <label for="operation-type">Elige el tipo de operación:</label>
+        <select id="operation-type">
+            <option value="all">Mixto</option>
+            <option value="+">Sumas</option>
+            <option value="-">Restas</option>
+            <option value="positive-subtraction">Restas (resultado positivo)</option>
+            <option value="*">Multiplicaciones</option>
+            <option value=":">Divisiones</option>
+        </select>
         <p id="question" style="font-size: 1.5em; margin: 20px 0;"></p>
         <div class="traditional-operation" id="operation"></div>
         <div class="controls">
@@ -125,6 +141,7 @@
         const winnerElement = document.getElementById("winner");
         const answerInput = document.getElementById("answer");
         const restartButton = document.getElementById("restart");
+        const operationTypeSelector = document.getElementById("operation-type");
 
         let player1Position = 0;
         let player2Position = 0;
@@ -135,23 +152,35 @@
         updateQuestion();
 
         function generateProblem() {
-            const operations = ['+', '-', '*', ':'];
+            const operationType = operationTypeSelector.value;
+            let operations;
+
+            if (operationType === "all") {
+                operations = ["+", "-", "*", ":"];
+            } else if (operationType === "positive-subtraction") {
+                operations = ["-"];
+            } else {
+                operations = [operationType];
+            }
+
             let num1 = Math.floor(Math.random() * 100) + 1;
             let num2 = Math.floor(Math.random() * 100) + 1;
             const operation = operations[Math.floor(Math.random() * operations.length)];
             let answer;
 
-            if (operation === ':') {
+            if (operation === ":") {
                 // Ensure exact division
                 num1 = num1 * num2;
                 answer = num1 / num2;
+            } else if (operation === "-") {
+                if (operationType === "positive-subtraction" && num1 < num2) {
+                    [num1, num2] = [num2, num1];
+                }
+                answer = num1 - num2;
             } else {
                 switch (operation) {
                     case '+':
                         answer = num1 + num2;
-                        break;
-                    case '-':
-                        answer = num1 - num2;
                         break;
                     case '*':
                         answer = num1 * num2;
@@ -161,13 +190,15 @@
 
             return {
                 question: `${num1} ${operation} ${num2}`,
-                latex: `\(${num1} ${operation} ${num2}\)` ,
                 traditional: formatTraditionalOperation(num1, num2, operation),
                 answer
             };
         }
 
         function formatTraditionalOperation(num1, num2, operation) {
+            if (operation === ":") {
+                return `${num1} : ${num2}`;
+            }
             return `
                 <div>${num1}</div>
                 <div>${operation} ${num2}</div>
@@ -181,7 +212,7 @@
             clearTimeout(timeOut);
 
             const remainingSteps = goalPosition - player2Position;
-            const delay = Math.max(5000, remainingSteps * 2000); // Tiempo dinámico basado en cercanía
+            const delay = Math.max(5000, remainingSteps * 2000);
 
             timeOut = setTimeout(() => {
                 player2Position++;
@@ -247,6 +278,11 @@
             movePlayer(player2, player2Position);
             updateQuestion();
         }
+
+        operationTypeSelector.addEventListener("change", () => {
+            currentProblem = generateProblem();
+            updateQuestion();
+        });
     </script>
 </body>
 </html>
